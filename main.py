@@ -25,10 +25,9 @@ def main():
         f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
     ])
 
-    from com.cmpe220.benchmark import Example1, Example2
+    from com.cmpe220.benchmark import Example1
 
     print(Example1().benchmark())
-    # Example2().hello()
 
     jpype.shutdownJVM()
 
