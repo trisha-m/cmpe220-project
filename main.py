@@ -25,9 +25,17 @@ def main():
         f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
     ])
 
-    from com.cmpe220.benchmark import Example1
+    # from com.cmpe220.benchmark import Example1
+    # print(Example1().benchmark())
 
-    print(Example1().benchmark())
+    # Run all benchmarks in com.cmpe220.benchmark
+    java_benchmarks_object = jpype.JPackage('com.cmpe220.benchmark')
+    java_benchmarks_list = list(dir(java_benchmarks_object))
+    java_benchmarks_list.remove('AbstractBenchmark')
+    for bm in java_benchmarks_list:
+        print(f'Running {bm}...')
+        instance = getattr(java_benchmarks_object, bm)()
+        print('Time: ' + str(instance.benchmark()))
 
     jpype.shutdownJVM()
 
