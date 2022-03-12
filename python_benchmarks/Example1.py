@@ -1,7 +1,10 @@
 '''
-This is run from the parent directory, so
+REQUIRED: have Cassandra DB already running
+pip install cassandra-driver (https://docs.datastax.com/en/developer/python-driver/3.25/)
+
+(This is run from the parent directory, so
 "python_benchmarks.AbstractBenchmark"
-is required instead of "AbstractBenchmark"
+is required instead of "AbstractBenchmark")
 '''
 from python_benchmarks.AbstractBenchmark import AbstractBenchmark
 from cassandra.cluster import Cluster

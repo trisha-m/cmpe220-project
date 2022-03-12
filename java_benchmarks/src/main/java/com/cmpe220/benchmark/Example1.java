@@ -3,6 +3,9 @@ package com.cmpe220.benchmark;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.*;
 
+/**
+* REQUIRED: have Cassandra DB already running
+*/
 public class Example1 extends AbstractBenchmark {
 
     private CqlSession session;
