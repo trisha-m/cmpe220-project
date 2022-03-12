@@ -9,7 +9,7 @@ public class Example1 extends AbstractBenchmark {
 
     public Example1() {
         category = "Read";
-        description = "Example";
+        description = "This is an example";
     }
 
     public void setupQuery() {
