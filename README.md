@@ -44,11 +44,11 @@ Python's, and ...'s implementation of `benchmark()` follow the same logic.
 
 ### Adding Java Benchmarks
 
-Add a new Java file to `java_benchmarks/src/.../benchmark/` that implements the abstract class `AbstractBenchmark.java`. See `Example1.java` for an example.
+Add a new Java file to `java_benchmarks/src/.../benchmark/` that implements the abstract class `AbstractBenchmark.java`. See [`Example1.java`](java_benchmarks/src/main/java/com/cmpe220/benchmark/Example1.java) for an example.
 
 ### Adding Python Benchmarks
 
-Add a new Python file to `python_benchmarks/` that implements the abstract class in `AbstractBenchmark.py`. See `Example1.py` for an example.
+Add a new Python file to `python_benchmarks/` that implements the abstract class in `AbstractBenchmark.py`. See [`Example1.py`](python_benchmarks/Example1.py) for an example.
 
 ## Our Results
 
