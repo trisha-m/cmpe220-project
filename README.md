@@ -14,7 +14,7 @@ Maven (3.8.3)
 
 `main.py` runs all the benchmarks in `java_benchmarks/`, `python_benchmarks/`, and ...
 
-Results are saved to a json file (todo).
+Data of results are saved to a .json file and visualizations of data to directory ... (todo).
 
 See `python main.py --help` for available arguments.
 
@@ -27,3 +27,7 @@ Add a new Java file to `java_benchmarks/src/.../benchmark/` that implements the 
 ### Python
 
 Add a new Python file to `python_benchmarks/` that implements the abstract class in `AbstractBenchmark.py`. See `Example1.py` for an example.
+
+## Our Results
+
+todo
