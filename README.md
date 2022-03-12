@@ -22,9 +22,9 @@ See `python main.py --help` for available arguments.
 
 `java_benchmarks`, `python_benchmarks`, and ... have an abstract benchmark class. To add benchmarks, create a new file that implements this abstract class.
 
-Specifically, only abstract function `runQuery()` is required to be implemented. In addition, `startQuery()` and `endQuery()` may optionally be implemented.
+Specifically, only abstract function `runQuery()` is required to be implemented. `startQuery()` and `endQuery()` may optionally be implemented.
 
-Ultimately, `main.py` calls function `benchmark()` which relies on the mentioned functions. I.e. `benchmark()` is implemented as follows in Java:
+Ultimately, `main.py` calls function `benchmark()` to run the benchmark which relies on the mentioned functions. I.e. `benchmark()` is implemented as follows in Java:
 
 ```
 // AbstractBenchmark.java
@@ -40,7 +40,7 @@ public long benchmark() {
 }
 ```
 
-Python's, ... implementation of `benchmark()` follow the same logic.
+Python's, and ...'s implementation of `benchmark()` follow the same logic.
 
 ### Adding Java Benchmarks
 
