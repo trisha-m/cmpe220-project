@@ -20,7 +20,7 @@ See `python main.py --help` for available arguments.
 
 ## How to add benchmarks
 
-`java_benchmarks`, `python_benchmarks`, and ... have an abstract benchmark class. To add benchmarks, create a new file that implements this abstract class.
+`java_benchmarks/`, `python_benchmarks/`, and ... have an abstract benchmark class. To add a new benchmark, create a new file that implements this abstract class.
 
 Specifically, only abstract function `runQuery()` is required to be implemented. `startQuery()` and `endQuery()` may optionally be implemented.
 
