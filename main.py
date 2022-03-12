@@ -3,6 +3,7 @@ import jpype.imports
 from jpype.types import *
 import subprocess
 import logging
+import argparse
 import sys
 
 JAVA_BENCHMARKS_DIR = 'java_benchmarks'
@@ -12,6 +13,14 @@ logging.basicConfig(
     format='[%(asctime)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     level=logging.INFO,
+)
+
+parser = argparse.ArgumentParser(description='CMPE 220 DBMS Benchmarker')
+parser.add_argument(
+    '--no-java-compile',
+    action='store_true',
+    default=False,
+    help='Skip compiliation of Java benchmarks',
 )
 
 
@@ -32,17 +41,14 @@ def compile_java_benchmarks():
 
 
 def main():
+    args = parser.parse_args()
 
-    compile_java_benchmarks()
-
+    # Run all Java benchmarks (in package com.cmpe220.benchmark, in jar)
+    if args.no_java_compile is False:
+        compile_java_benchmarks()
     jpype.startJVM(classpath=[
         f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
     ])
-
-    # from com.cmpe220.benchmark import Example1
-    # print(Example1().benchmark())
-
-    # Run all benchmarks in com.cmpe220.benchmark
     java_benchmarks_object = jpype.JPackage('com.cmpe220.benchmark')
     java_benchmarks_list = list(dir(java_benchmarks_object))
     java_benchmarks_list.remove('AbstractBenchmark')
@@ -55,8 +61,9 @@ def main():
         except Exception as e:
             logging.error(f'Benchmark "{bm}" failed!')
             logging.exception(e)
-
     jpype.shutdownJVM()
+
+    # Run all Python benchmarks
 
 
 if __name__ == '__main__':
