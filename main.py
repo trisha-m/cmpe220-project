@@ -15,7 +15,9 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-parser = argparse.ArgumentParser(description='CMPE 220 DBMS Benchmarker')
+parser = argparse.ArgumentParser(
+    description='CMPE 220 DBMS Benchmarker Framework',
+)
 parser.add_argument(
     '--no-java-compile',
     action='store_true',
@@ -57,7 +59,7 @@ def main():
         try:
             instance = getattr(java_benchmarks_object, bm)()
             time = instance.benchmark()
-            logging.info('Time: ' + str(time))
+            logging.info(f'Time: {time}ms')
         except Exception as e:
             logging.error(f'Benchmark "{bm}" failed!')
             logging.exception(e)

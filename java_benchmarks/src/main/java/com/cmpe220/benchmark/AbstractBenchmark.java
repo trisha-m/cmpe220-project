@@ -7,7 +7,7 @@ abstract public class AbstractBenchmark {
 
     /**
     * Operations before the actual query
-    * such as connection, initializations, etc.
+    * e.g. connection, initializations, etc.
     */
     protected void setupQuery() {
 
@@ -15,6 +15,7 @@ abstract public class AbstractBenchmark {
 
     /**
     * Operations after the query
+    * e.g. cleanup, shutdown, etc.
     */
     protected void endQuery() {
 
