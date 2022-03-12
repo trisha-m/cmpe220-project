@@ -1,5 +1,5 @@
 import jpype
-import jpype.imports
+# import jpype.imports
 from jpype.types import *
 from importlib import import_module
 from os import listdir
@@ -52,8 +52,8 @@ def run_benchmark(instance, name):
         t = instance.benchmark()
         logging.info(f'Time: {t}ms')
         return {
-            'category': instance.getCategory(),
-            'time': t,
+            'category': str(instance.getCategory()),
+            'time': float(t),
             'success': True,
         }
     except Exception as e:
@@ -97,10 +97,8 @@ def run_java_benchmarks():
     java_benchmarks_list.remove('AbstractBenchmark')
     results = {}
     for bm in java_benchmarks_list:
-        logging.info(f'Running benchmark "{bm}"...')
         instance = getattr(java_benchmarks_object, bm)()
         results[bm] = run_benchmark(instance, bm)
-    print(results)
     return results
 
 
@@ -124,32 +122,36 @@ def run_python_benchmarks():
             module_name,
         )()
         results[module_name] = run_benchmark(instance, module_name)
-    print(results)
     return results
 
 
 def main():
     args = parser.parse_args()
+    results = {}
 
     # Run all Java benchmarks
     if args.no_java is False:
-        jpype.startJVM(classpath=[
-            f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
-        ])
-
         compile_success = True
         if args.no_java_compile is False:
             compile_success = compile_java_benchmarks()
         if compile_success:
-            run_java_benchmarks()
+            jpype.startJVM(classpath=[
+                f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
+            ])
+            results['java'] = run_java_benchmarks()
+            try:
+                jpype.shutdownJVM()
+            except Exception:
+                logging.error('Failed to shutdown JVM')
         else:
             logging.info('Java compiliation failed, skipping benchmarks...')
-
-        jpype.shutdownJVM()
+            results['java'] = {}
 
     # Run all Python benchmarks
     if args.no_python is False:
-        run_python_benchmarks()
+        results['python'] = run_python_benchmarks()
+
+    logging.info(results)
 
 
 if __name__ == '__main__':
