@@ -6,6 +6,7 @@ Framework to benchmark different DBMS software, drivers, etc. in different scena
 
 ```
 Python3 (3.9.5)
+Jpype (pip install JPype1)
 Java (11)
 Maven (3.8.3)
 ```
