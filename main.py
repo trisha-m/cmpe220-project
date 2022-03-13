@@ -3,6 +3,7 @@ import jpype
 from jpype.types import *
 from importlib import import_module
 from os import listdir
+from abc import ABC, abstractmethod
 import subprocess
 import logging
 import argparse
@@ -41,88 +42,115 @@ parser.add_argument(
 )
 
 
-def run_benchmark(instance, name):
-    '''
-    Run a benchmark with an instance
-    :return: results
-    :rtype: dict
-    '''
-    logging.info(f'Running benchmark "{name}"...')
-    try:
-        t = instance.benchmark()
-        logging.info(f'Time: {t}ms')
-        return {
-            'category': str(instance.getCategory()),
-            'time': float(t),
-            'success': True,
-        }
-    except Exception as e:
-        logging.error(f'Benchmark "{name}" failed!')
-        logging.exception(e)
-        return {
-            'success': False,
-        }
+class BenchmarkFacade(ABC):
+
+    def __init__(self):
+        self.init()
+
+    def run_benchmark(self, instance, name):
+        '''
+        Run a benchmark with an instance
+        :return: results
+        :rtype: dict
+        '''
+        logging.info(f'Running benchmark "{name}"...')
+        try:
+            t = instance.benchmark()
+            logging.info(f'Time: {t}ms')
+            return {
+                'category': str(instance.getCategory()),
+                'time': float(t),
+                'success': True,
+            }
+        except Exception as e:
+            logging.error(f'Benchmark "{name}" failed!')
+            logging.exception(e)
+            return {
+                'success': False,
+            }
+
+    def init(self):
+        pass
+
+    @abstractmethod
+    def run(self):
+        pass
 
 
-def compile_java_benchmarks():
-    '''
-    Compile the benchmarks with maven
-    :return: success of compilation
-    '''
-    logging.info('Compiling Java benchmarks...')
-    try:
-        ret = subprocess.run(
-            'mvn package',
-            cwd=JAVA_BENCHMARKS_DIR,
-            shell=True,
-            capture_output=True,
-        )
-        ret.check_returncode()
-        logging.debug(str(ret.stdout))
-        return True
-    except subprocess.CalledProcessError:
-        logging.error(str(ret.stderr))
-        return False
+class JavaBenchmarkFacade(BenchmarkFacade):
+
+    @staticmethod
+    def compile_java_benchmarks():
+        '''
+        Compile the benchmarks with maven
+        :return: success of compilation
+        '''
+        logging.info('Compiling Java benchmarks...')
+        try:
+            ret = subprocess.run(
+                'mvn package',
+                cwd=JAVA_BENCHMARKS_DIR,
+                shell=True,
+                capture_output=True,
+            )
+            ret.check_returncode()
+            logging.debug(str(ret.stdout))
+            return True
+        except subprocess.CalledProcessError:
+            logging.error(str(ret.stderr))
+            return False
+
+    def init(self):
+        jpype.startJVM(classpath=[
+            f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
+        ])
+
+    def run(self):
+        '''
+        Load and run java benchmarks from
+        package com.cmpe220.benchmark in the jar file
+        :return: results
+        :rtype: dict
+        '''
+        java_benchmarks_object = jpype.JPackage('com.cmpe220.benchmark')
+        java_benchmarks_list = list(dir(java_benchmarks_object))
+        java_benchmarks_list.remove('AbstractBenchmark')
+        results = {}
+        for bm in java_benchmarks_list:
+            instance = getattr(java_benchmarks_object, bm)()
+            results[bm] = self.run_benchmark(instance, bm)
+
+        try:
+            jpype.shutdownJVM()
+        except Exception:
+            logging.error('Failed to shutdown JVM')
+
+        return results
 
 
-def run_java_benchmarks():
-    '''
-    Load and run java benchmarks from
-    package com.cmpe220.benchmark in the jar file
-    :return: results
-    :rtype: dict
-    '''
-    java_benchmarks_object = jpype.JPackage('com.cmpe220.benchmark')
-    java_benchmarks_list = list(dir(java_benchmarks_object))
-    java_benchmarks_list.remove('AbstractBenchmark')
-    results = {}
-    for bm in java_benchmarks_list:
-        instance = getattr(java_benchmarks_object, bm)()
-        results[bm] = run_benchmark(instance, bm)
-    return results
+class PythonBenchmarkFacade(BenchmarkFacade):
 
-
-def run_python_benchmarks():
-    '''
-    Load and run python benchmarks
-    :return: results
-    :rtype: dict
-    '''
-    python_benchmarks_list = listdir(PYTHON_BENCHMARKS_DIR)
-    python_benchmarks_list.remove('AbstractBenchmark.py')
-    python_benchmarks_list = list(filter(
-        lambda x: x.endswith('.py'),
-        python_benchmarks_list
-    ))
-    results = {}
-    for bm in python_benchmarks_list:
-        module_name = bm[:-3]  # rm ".py" from end of filename
-        instance = getattr(
-            import_module(f'{PYTHON_BENCHMARKS_DIR}.{module_name}'),
-            module_name,
-        )()
-        results[module_name] = run_benchmark(instance, module_name)
-    return results
+    def run(self):
+        '''
+        Load and run python benchmarks
+        :return: results
+        :rtype: dict
+        '''
+        python_benchmarks_list = listdir(PYTHON_BENCHMARKS_DIR)
+        python_benchmarks_list.remove('AbstractBenchmark.py')
+        python_benchmarks_list = list(filter(
+            lambda x: x.endswith('.py'),
+            python_benchmarks_list
+        ))
+        results = {}
+        for bm in python_benchmarks_list:
+            module_name = bm[:-3]  # rm ".py" from end of filename
+            instance = getattr(
+                import_module(f'{PYTHON_BENCHMARKS_DIR}.{module_name}'),
+                module_name,
+            )()
+            results[module_name] = self.run_benchmark(instance, module_name)
+        return results
 
 
 def main():
@@ -133,23 +161,16 @@ def main():
     if args.no_java is False:
         compile_success = True
         if args.no_java_compile is False:
-            compile_success = compile_java_benchmarks()
+            compile_success = JavaBenchmarkFacade.compile_java_benchmarks()
         if compile_success:
-            jpype.startJVM(classpath=[
-                f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
-            ])
-            results['java'] = run_java_benchmarks()
-            try:
-                jpype.shutdownJVM()
-            except Exception:
-                logging.error('Failed to shutdown JVM')
+            results['java'] = JavaBenchmarkFacade().run()
         else:
             logging.info('Java compiliation failed, skipping benchmarks...')
             results['java'] = {}
 
     # Run all Python benchmarks
     if args.no_python is False:
-        results['python'] = run_python_benchmarks()
+        results['python'] = PythonBenchmarkFacade().run()
 
     logging.info(results)
 
