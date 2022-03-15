@@ -26,8 +26,9 @@ public class Example1 extends AbstractBenchmark {
     }
 
     public void runQuery() {
-        ResultSet rs = session.execute("select release_version from system.local");
-        Row row = rs.one();
-        System.out.println(row.getString("release_version"));
+        session.execute("select release_version from system.local");
+        // ResultSet rs = session.execute("select release_version from system.local");
+        // Row row = rs.one();
+        // System.out.println(row.getString("release_version"));
     }
 }

@@ -26,6 +26,7 @@ class Example1(AbstractBenchmark):
         # self.session.close()
 
     def runQuery(self):
-        result = self.session.execute(
-            'SELECT release_version FROM system.local')
-        print(result.one())
+        self.session.execute('SELECT release_version FROM system.local')
+        # result = self.session.execute(
+        #     'SELECT release_version FROM system.local')
+        # print(result.one())
