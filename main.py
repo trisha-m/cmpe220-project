@@ -8,6 +8,7 @@ import subprocess
 import logging
 import argparse
 import sys
+import json
 
 JAVA_BENCHMARKS_DIR = 'java_benchmarks'
 BENCHMARK_JAR_NAME = 'java_benchmarks-1.0-jar-with-dependencies.jar'
@@ -44,8 +45,8 @@ parser.add_argument(
 
 class BenchmarkFacade(ABC):
 
-    def __init__(self):
-        self.init()
+    def __init__(self, args):
+        pass
 
     def run_benchmark(self, instance, name):
         '''
@@ -68,9 +69,6 @@ class BenchmarkFacade(ABC):
             return {
                 'success': False,
             }
-
-    def init(self):
-        pass
 
     @abstractmethod
     def run(self):
@@ -100,7 +98,10 @@ class JavaBenchmarkFacade(BenchmarkFacade):
             logging.error(str(ret.stderr))
             return False
 
-    def init(self):
+    def __init__(self, args):
+        self.compile_success = True
+        if args.no_java_compile is False:
+            self.compile_success = self.compile_java_benchmarks()
         jpype.startJVM(classpath=[
             f'{JAVA_BENCHMARKS_DIR}/target/{BENCHMARK_JAR_NAME}',
         ])
@@ -112,6 +113,9 @@ class JavaBenchmarkFacade(BenchmarkFacade):
         :return: results
         :rtype: dict
         '''
+        if self.compile_success is False:
+            logging.info('Java compiliation failed, skipping benchmarks...')
+            return {}
         java_benchmarks_object = jpype.JPackage('com.cmpe220.benchmark')
         java_benchmarks_list = list(dir(java_benchmarks_object))
         java_benchmarks_list.remove('AbstractBenchmark')
@@ -156,23 +160,18 @@ class PythonBenchmarkFacade(BenchmarkFacade):
 def main():
     args = parser.parse_args()
     results = {}
-
-    # Run all Java benchmarks
+    benchmark_instances = {}
     if args.no_java is False:
-        compile_success = True
-        if args.no_java_compile is False:
-            compile_success = JavaBenchmarkFacade.compile_java_benchmarks()
-        if compile_success:
-            results['java'] = JavaBenchmarkFacade().run()
-        else:
-            logging.info('Java compiliation failed, skipping benchmarks...')
-            results['java'] = {}
-
-    # Run all Python benchmarks
+        benchmark_instances['java'] = JavaBenchmarkFacade(args)
     if args.no_python is False:
-        results['python'] = PythonBenchmarkFacade().run()
+        benchmark_instances['python'] = PythonBenchmarkFacade(args)
 
-    logging.info(results)
+    # Run all benchmarks
+    for name in benchmark_instances:
+        logging.info(f'Running {name} benchmarks...')
+        results[name] = benchmark_instances[name].run()
+
+    logging.info(json.dumps(results))
 
 
 if __name__ == '__main__':
