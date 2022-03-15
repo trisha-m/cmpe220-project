@@ -23,7 +23,7 @@ class Example1(AbstractBenchmark):
 
     def endQuery(self):
         print('Closing...')
-        self.session.close()
+        # self.session.close()
 
     def runQuery(self):
         result = self.session.execute(

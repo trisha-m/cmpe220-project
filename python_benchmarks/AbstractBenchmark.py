@@ -41,6 +41,7 @@ class AbstractBenchmark(ABC):
         self.runQuery()
         end_time = time_ns()
 
+        self.endQuery()
         return (end_time - start_time) / 1000000
 
 
