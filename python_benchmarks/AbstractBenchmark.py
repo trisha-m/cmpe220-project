@@ -44,10 +44,8 @@ class AbstractBenchmark(ABC):
         self.endQuery()
         return (end_time - start_time) / 1000000
 
-
     def getCategory(self):
         return self.category
-
 
     def getDescription(self):
         return self.description
