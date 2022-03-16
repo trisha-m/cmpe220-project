@@ -21,7 +21,11 @@ class CreateTable_5Columns(AbstractBenchmark):
         cluster = Cluster()
         self.session = cluster.connect()
 
-        self.session.execute("CREATE KEYSPACE cmpe220KS WITH replication={'class':'SimpleStrategy','replication_factor':1}")
+        self.session.execute(
+            "CREATE KEYSPACE cmpe220KS "
+            "WITH replication="
+            "{'class':'SimpleStrategy','replication_factor':1}"
+        )
         self.session.execute("USE cmpe220KS")
 
     def endQuery(self):
@@ -30,4 +34,11 @@ class CreateTable_5Columns(AbstractBenchmark):
         self.session.execute("DROP KEYSPACE cmpe220KS")
 
     def runQuery(self):
-        self.session.execute('CREATE TABLE fivecolumns(col1 TEXT PRIMARY KEY, col2 TEXT, col3 TEXT, col4 TEXT, col5 TEXT)')
+        self.session.execute(
+            'CREATE TABLE fivecolumns('
+            'col1 TEXT PRIMARY KEY,'
+            'col2 TEXT,'
+            'col3 TEXT,'
+            'col4 TEXT,'
+            'col5 TEXT)'
+        )

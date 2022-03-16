@@ -38,7 +38,7 @@ class MySQL_CreateTable_5Columns(AbstractBenchmark):
         self.cursor.execute(
             'CREATE TABLE fivecolumns('
             'col1 VARCHAR(14) PRIMARY KEY,'
-            'col2 VARCHAR(14),'
+            'col2 TEXT,'
             'col3 TEXT,'
             'col4 TEXT,'
             'col5 TEXT)'

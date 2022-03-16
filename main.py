@@ -124,10 +124,12 @@ class JavaBenchmarkFacade(BenchmarkFacade):
             instance = getattr(java_benchmarks_object, bm)()
             results[bm] = self.run_benchmark(instance, bm)
 
-        try:
-            jpype.shutdownJVM()
-        except Exception:
-            logging.error('Failed to shutdown JVM')
+        # TODO: fix shutdownJVM() hangs
+        # try:
+        #     logging.info('Shutting down JVM...')
+        #     jpype.shutdownJVM()
+        # except Exception:
+        #     logging.error('Failed to shutdown JVM')
 
         return results
 
